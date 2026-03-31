@@ -9,7 +9,7 @@ import { MessageFilters } from "../app/components/MessageFilters";
 import { ErrorBanner } from "../app/components/ErrorBanner";
 import type { WsMessage } from "../app/types/message";
 
-const WS_URL = "ws://localhost:8080";
+const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080";
 
 export default function HomePage() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
