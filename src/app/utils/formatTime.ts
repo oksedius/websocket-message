@@ -1,4 +1,3 @@
-// Форматирует ISO строку в читаемое время "14:32:05"
 export function formatTime(isoString: string): string {
   const date = new Date(isoString);
   return date.toLocaleTimeString("ru-RU", {
