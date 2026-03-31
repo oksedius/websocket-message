@@ -15,6 +15,7 @@ type UseWebSocketReturn = {
   reconnectAttempts: number;
   connect: () => void;
   disconnect: () => void;
+  sendMessage: (text: string) => void;
 };
 
 export function useWebSocket({
@@ -105,6 +106,13 @@ export function useWebSocket({
     };
   }, [url, closeSocket, clearTimer]);
 
+  // Отправка сообщения через WebSocket
+  const sendMessage = useCallback((text: string) => {
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ text }));
+    }
+  }, []);
+
   const connect = useCallback(() => {
     manualDisconnectRef.current = false;
     reconnectAttemptsRef.current = 0;
@@ -130,5 +138,5 @@ export function useWebSocket({
     };
   }, [createConnection, clearTimer, closeSocket]);
 
-  return { status, reconnectAttempts, connect, disconnect };
+  return { status, reconnectAttempts, connect, disconnect, sendMessage };
 }

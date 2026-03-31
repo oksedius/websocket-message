@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useWebSocket } from "../app/hooks/useWebSocket";
-import { useMessages } from "../app/hooks/useMessages";
-import { ConnectionStatus } from "../app/components/ConnectionStatus";
-import { MessageList } from "../app/components/MessageList";
-import { MessageFilters } from "../app/components/MessageFilters";
-import { ErrorBanner } from "../app/components/ErrorBanner";
-import type { WsMessage } from "../app/types/message";
+import { useWebSocket } from "./hooks/useWebSocket";
+import { useMessages } from "./hooks/useMessages";
+import { ConnectionStatus } from "./components/ConnectionStatus";
+import { MessageList } from "./components/MessageList";
+import { MessageFilters } from "./components/MessageFilters";
+import { ErrorBanner } from "./components/ErrorBanner";
+import { MessageInput } from "./components/MessageInput";
+import type { WsMessage } from "./types/message";
 
 const WS_URL = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8080";
 
@@ -47,7 +48,7 @@ export default function HomePage() {
             text: msg.data.text,
             createdAt: msg.data.createdAt,
             receivedAt: new Date().toISOString(),
-            isRead: true,   
+            isRead: true,
             isSystem: true,
           });
           break;
@@ -68,10 +69,11 @@ export default function HomePage() {
     [addMessage, markRead, deleteMessage]
   );
 
-  const { status, reconnectAttempts, connect, disconnect } = useWebSocket({
-    url: WS_URL,
-    onMessage: handleWsMessage,
-  });
+  const { status, reconnectAttempts, connect, disconnect, sendMessage } =
+    useWebSocket({
+      url: WS_URL,
+      onMessage: handleWsMessage,
+    });
 
   return (
     <main className="min-h-screen bg-gray-50 py-8 px-4">
@@ -93,6 +95,9 @@ export default function HomePage() {
           onClose={() => setErrorMessage(null)}
         />
 
+        {/* Инпут для отправки сообщений */}
+        <MessageInput onSend={sendMessage} status={status} />
+
         <div className="flex items-center justify-between">
           <span className="text-sm font-medium text-gray-700">
             Unread:{" "}
@@ -104,7 +109,7 @@ export default function HomePage() {
         </div>
 
         <MessageFilters current={filter} onChange={setFilter} />
-        
+
         <MessageList messages={messages} onRead={markRead} />
       </div>
     </main>

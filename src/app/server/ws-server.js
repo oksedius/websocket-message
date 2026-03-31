@@ -7,39 +7,35 @@ console.log("WS server running on ws://localhost:8080");
 wss.on("connection", (ws) => {
   ws.send(JSON.stringify({ type: "hello" }));
 
-  const timer = setInterval(() => {
-    const random = Math.random();
+  ws.on("message", (data) => {
+    try {
+      const parsed = JSON.parse(data.toString());
 
-    if (random < 0.6) {
-      ws.send(
-        JSON.stringify({
-          type: "message",
-          data: {
-            id: String(Date.now() + Math.random()),
-            text: "Ping " + new Date().toLocaleTimeString(),
-            createdAt: new Date().toISOString(),
-          },
-        }),
-      );
-    } else if (random < 0.75) {
-      ws.send(
-        JSON.stringify({
-          type: "system",
-          data: {
-            text: "System event at " + new Date().toLocaleTimeString(),
-            createdAt: new Date().toISOString(),
-          },
-        }),
-      );
-    } else if (random < 0.9) {
+      wss.clients.forEach((client) => {
+        if (client.readyState === 1) {
+          client.send(
+            JSON.stringify({
+              type: "message",
+              data: {
+                id: String(Date.now() + Math.random()),
+                text: parsed.text,
+                createdAt: new Date().toISOString(),
+              },
+            }),
+          );
+        }
+      });
+    } catch {
       ws.send(
         JSON.stringify({
           type: "error",
-          data: { message: "Random server warning" },
+          data: { message: "Invalid message format" },
         }),
       );
     }
-  }, 2000);
+  });
 
-  ws.on("close", () => clearInterval(timer));
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
 });
